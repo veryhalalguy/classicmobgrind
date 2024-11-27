@@ -8,20 +8,20 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background-image: url('./background.png'); /* Set background image */
+            background-image: url('./background.png');
             background-size: 100%;
-            padding-bottom: 150px; /* Prevent content from being covered by footer */
+            padding-bottom: 150px;
         }
         .container {
             width: 300px;
             margin: 0 auto;
-            background-color: rgba(255, 255, 255, 0.8); /* Add semi-transparent background for better readability */
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 20px;
-            padding-right: 30px;  /* Add extra padding on the right side */
-            border-radius: 8px; /* Optional: rounded corners */
+            padding-right: 30px;
+            border-radius: 8px;
         }
         label {
-            font-size: 16pt; /* Set label text size to 16pt */
+            font-size: 16pt;
         }
         input, select {
             width: 100%;
@@ -30,15 +30,15 @@
             font-size: 14px;
         }
         button {
-            width: 75%;  /* Set width to auto to allow for centering */
+            width: 75%;
             padding: 10px;
             font-size: 16px;
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
-            display: block;  /* Make the button a block-level element */
-            margin-left: auto;  /* Center the button */
-            margin-right: auto;  /* Center the button */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
         .result {
             margin-top: 20px;
@@ -68,19 +68,19 @@
             text-align: center;
         }
         footer {
-            position: fixed; /* Fix the footer at the bottom */
+            position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%; /* Full width */
-            height: 10px; /* Set height to 150px */
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-            color: white; /* Text color */
-            text-align: center; /* Center the text */
+            width: 100%;
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 14px;
-            padding: 10px 0; /* Padding for spacing */
+            padding: 10px 0;
         }
     </style>
 </head>
@@ -88,13 +88,19 @@
     <h1>Mob Grind XP Calculator</h1>
     <div class="container">
         <form id="xp-form">
-            <label for="level">Select Level:</label>
+            <label for="level">Current Level:</label>
             <select id="level" name="level" required>
             </select>
 
+            <label for="xp-type">XP Type:</label>
+            <select id="xp-type" name="xp-type" required>
+                <option value="percent">Percent</option>
+                <option value="number">Number</option>
+            </select>
+            
             <label for="y">Current XP:</label>
             <input type="number" id="y" name="y" step="any" required>
-            
+
             <label for="w">Lowest XP Gain Per Mob:</label>
             <input type="number" id="w" name="w" step="any" required>
             
@@ -139,21 +145,40 @@
             }
         }
 
+        function isValidInput() {
+            const y = parseFloat(document.getElementById("y").value);
+            const w = parseFloat(document.getElementById("w").value);
+            const z = parseFloat(document.getElementById("z").value);
+
+            return !isNaN(y) && !isNaN(w) && !isNaN(z) && y >= 0 && w > 0 && z > 0;
+        }
+
         function calculateXP() {
+            if (!isValidInput()) {
+                return;
+            }
+
             const level = parseInt(document.getElementById("level").value);
             const y = parseFloat(document.getElementById("y").value);
             const w = parseFloat(document.getElementById("w").value);
             const z = parseFloat(document.getElementById("z").value);
-            
+            const xpType = document.getElementById("xp-type").value;
+
             const x = xpTable[level] || 0;
             const avgWZ = (w + z) / 2;
-            const result = (x - y) / avgWZ;
-            
+
+            let currentXP = y;
+            if (xpType === 'percent') {
+                currentXP = (y / 100) * x;
+            }
+
+            const result = (x - currentXP) / avgWZ;
+
             document.getElementById("result").textContent = result.toFixed(2);
 
             const smiley = document.getElementById("smiley");
             const message = document.getElementById("message");
-            if (result < 30) {
+            if (result <= 100) {
                 smiley.innerHTML = "😄";
                 smiley.className = "smiley green";
                 message.textContent = "GRIND YOU'RE ALMOST THERE";
@@ -169,6 +194,12 @@
         document.getElementById("xp-form").addEventListener("submit", function(event) {
             event.preventDefault();
             calculateXP();
+        });
+
+        document.getElementById("level").addEventListener("change", function() {
+            if (isValidInput()) {
+                calculateXP();
+            }
         });
 
         populateLevelOptions();
