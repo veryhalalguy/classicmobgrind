@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mob Grind XP Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-image: url('./background.png'); /* Set background image */
+            background-size: 100%;
+            padding-bottom: 150px; /* Prevent content from being covered by footer */
+        }
+        .container {
+            width: 300px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.8); /* Add semi-transparent background for better readability */
+            padding: 20px;
+            padding-right: 30px;  /* Add extra padding on the right side */
+            border-radius: 8px; /* Optional: rounded corners */
+        }
+        label {
+            font-size: 16pt; /* Set label text size to 16pt */
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        button {
+            width: 75%;  /* Set width to auto to allow for centering */
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            display: block;  /* Make the button a block-level element */
+            margin-left: auto;  /* Center the button */
+            margin-right: auto;  /* Center the button */
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .smiley {
+            font-size: 50px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .green {
+            color: green;
+        }
+        .red {
+            color: red;
+        }
+        .message {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        h1 {
+            color: white;
+            white-space: nowrap;
+            text-align: center;
+        }
+        footer {
+            position: fixed; /* Fix the footer at the bottom */
+            bottom: 0;
+            left: 0;
+            width: 100%; /* Full width */
+            height: 10px; /* Set height to 150px */
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white; /* Text color */
+            text-align: center; /* Center the text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            padding: 10px 0; /* Padding for spacing */
+        }
+    </style>
+</head>
+<body>
+    <h1>Mob Grind XP Calculator</h1>
+    <div class="container">
+        <form id="xp-form">
+            <label for="level">Select Level:</label>
+            <select id="level" name="level" required>
+            </select>
+
+            <label for="y">Current XP:</label>
+            <input type="number" id="y" name="y" step="any" required>
+            
+            <label for="w">Lowest XP Gain Per Mob:</label>
+            <input type="number" id="w" name="w" step="any" required>
+            
+            <label for="z">Highest XP Gain Per Mob:</label>
+            <input type="number" id="z" name="z" step="any" required>
+            
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div id="result-section" style="display:none;">
+            <div class="result">
+                <h2>You will need approximately: <span id="result"></span> mobs killed to reach the next level</h2>
+            </div>
+            <div class="smiley" id="smiley">
+            </div>
+            <div class="message" id="message">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>"Even the longest journey begins with a single step, and the mightiest dragon is slain by the patience of the smallest sword." - Albert Einstein</p>
+    </footer>
+
+    <script>
+        const xpTable = {
+            1: 400, 2: 900, 3: 1400, 4: 2100, 5: 2800, 6: 3600, 7: 4500, 8: 5400, 9: 6500, 10: 7600,
+            11: 8800, 12: 10100, 13: 11400, 14: 12900, 15: 14400, 16: 16000, 17: 17700, 18: 19400, 19: 21300, 20: 23200,
+            21: 25200, 22: 27300, 23: 29400, 24: 31700, 25: 34000, 26: 36400, 27: 38900, 28: 41400, 29: 44300, 30: 47400,
+            31: 50800, 32: 54500, 33: 58600, 34: 62800, 35: 67100, 36: 71600, 37: 76100, 38: 80800, 39: 85700, 40: 90700,
+            41: 95800, 42: 101000, 43: 106300, 44: 111800, 45: 117500, 46: 123200, 47: 129100, 48: 135100, 49: 141200, 50: 147500,
+            51: 153900, 52: 160400, 53: 167100, 54: 173900, 55: 180800, 56: 187900, 57: 195000, 58: 202300, 59: 209800, 60: 217400
+        };
+
+        function populateLevelOptions() {
+            const levelSelect = document.getElementById("level");
+            for (let level in xpTable) {
+                const option = document.createElement("option");
+                option.value = level;
+                option.textContent = `${level}`;
+                levelSelect.appendChild(option);
+            }
+        }
+
+        function calculateXP() {
+            const level = parseInt(document.getElementById("level").value);
+            const y = parseFloat(document.getElementById("y").value);
+            const w = parseFloat(document.getElementById("w").value);
+            const z = parseFloat(document.getElementById("z").value);
+            
+            const x = xpTable[level] || 0;
+            const avgWZ = (w + z) / 2;
+            const result = (x - y) / avgWZ;
+            
+            document.getElementById("result").textContent = result.toFixed(2);
+
+            const smiley = document.getElementById("smiley");
+            const message = document.getElementById("message");
+            if (result < 30) {
+                smiley.innerHTML = "😄";
+                smiley.className = "smiley green";
+                message.textContent = "GRIND YOU'RE ALMOST THERE";
+            } else {
+                smiley.innerHTML = "😞";
+                smiley.className = "smiley red";
+                message.textContent = "keep grinding kiddo, you'll get there";
+            }
+
+            document.getElementById("result-section").style.display = "block";
+        }
+
+        document.getElementById("xp-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            calculateXP();
+        });
+
+        populateLevelOptions();
+    </script>
+</body>
+</html>
